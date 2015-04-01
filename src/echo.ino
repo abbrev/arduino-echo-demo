@@ -79,6 +79,48 @@ void handle_tcp_echo(ipv4_header *ip, tcp_header *tcp)
 	slip_send_packet(ip, total_length);
 }
 
+void handle_tcp_discard(ipv4_header *ip, tcp_header *tcp)
+{
+	unsigned total_length = ntohs(ip->total_length);
+	byte header_length = ip->ihl * 4;
+	byte tcp_header_length = tcp->data_offset * 4;
+	unsigned segment_length = total_length - header_length - tcp_header_length;
+
+	// Acknowledge a SYN to start a connection.
+	if (tcp->syn || tcp->fin) {
+		tcp->ack = 1;
+	} else if (segment_length == 0) {
+		// nothing to ack
+		return;
+	}
+
+	uint32_t ackno = ntohl(tcp->seqno) + segment_length + tcp->syn + tcp->fin;
+
+	tcp->seqno = tcp->ackno;
+
+	tcp->ackno = htonl(ackno);
+
+	// keep the pipe filled!
+	tcp->window_size = htons(16384);
+
+	// shrink the TCP header to the minimum
+	tcp->data_offset = 20 / 4;
+	tcp_header_length = 20;
+	total_length = header_length + tcp_header_length;
+	ip->total_length = htons(total_length);
+
+	swap_ip_addresses(&ip->dst, &ip->src);
+	swap_ports(&tcp->dport, &tcp->sport);
+
+	tcp->checksum = 0;
+	tcp->checksum = ~tcp_checksum(ip, tcp);
+
+	ip->header_checksum = 0;
+	ip->header_checksum = ~ip_checksum(ip, header_length);
+
+	slip_send_packet(ip, total_length);
+}
+
 void handle_tcp(ipv4_header *ip, void *data)
 {
 	unsigned total_length = ntohs(ip->total_length);
@@ -91,6 +133,8 @@ void handle_tcp(ipv4_header *ip, void *data)
 
 	if (tcp->dport == htons(7)) {
 		return handle_tcp_echo(ip, tcp);
+	} else if (tcp->dport == htons(9)) {
+		return handle_tcp_discard(ip, tcp);
 	}
 
 	if (tcp->syn) {
