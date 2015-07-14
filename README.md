@@ -106,6 +106,8 @@ Performance
 Not that it really matters for a silly demo like this, but I tested its
 TCP and ping performance.
 
+### TCP Performance
+
 Multiple TCP connections were run in parallel (with each connection
 streaming data as fast as possible). Tests were performed in Linux.
 
@@ -131,6 +133,8 @@ TCP summary: application data transfer rates are close to the
 theoretical maximum data transfer rate with almost any number of
 parallel connections. Transfer rates drop above 20 connections, possibly
 due to the high RTT on each individual connection.
+
+### Ping Performance
 
 Pings were done with various packet sizes ("-s" option in the Linux
 "ping" command). Response times are largely dominated by the transfer
