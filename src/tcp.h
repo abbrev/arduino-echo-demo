@@ -4,40 +4,40 @@
 #include "ip.h"
 
 struct tcp_header {
-	word sport;
-	word dport;
+	uint16_t sport;
+	uint16_t dport;
 
-	dword seqno;
+	uint32_t seqno;
 
-	dword ackno;
+	uint32_t ackno;
 
 #if 0
 	// not in RFC793
-	bool  ns:1;
-	byte reserved1:3;
+	bool     ns:1;
+	uint8_t  reserved1:3;
 #else
-	byte reserved1:4;
+	uint8_t  reserved1:4;
 #endif
-	byte data_offset:4;
-	bool fin:1;
-	bool syn:1;
-	bool rst:1;
-	bool psh:1;
-	bool ack:1;
-	bool urg:1;
+	uint8_t  data_offset:4;
+	bool     fin:1;
+	bool     syn:1;
+	bool     rst:1;
+	bool     psh:1;
+	bool     ack:1;
+	bool     urg:1;
 #if 0
 	// not in RFC793
-	bool ece:1;
-	bool cwr:1;
+	bool     ece:1;
+	bool     cwr:1;
 #else
-	byte reserved2:2;
+	uint8_t  reserved2:2;
 #endif
-	word window_size;
+	uint16_t window_size;
 
-	word checksum;
-	word urgptr;
+	uint16_t checksum;
+	uint16_t urgptr;
 
-	byte options[0];
+	uint8_t  options[0];
 };
 
 uint16_t tcp_checksum(const ipv4_header *ip, const tcp_header *tcp);

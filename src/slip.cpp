@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include <stdint.h>
+
 #include "slip.h"
 
 #define END     0300
@@ -9,7 +11,7 @@
 
 #define SLIP_RX_SIZE 1024
 
-static byte slip_rx_buffer[SLIP_RX_SIZE];
+static uint8_t slip_rx_buffer[SLIP_RX_SIZE];
 static unsigned head, tail;
 //static unsigned end_count;
 
@@ -19,7 +21,7 @@ static unsigned head, tail;
 static void receive_slip_data()
 {
 	while (Serial.available()) {
-		byte b = Serial.read();
+		uint8_t b = Serial.read();
 		unsigned next_tail = (tail + 1) % SLIP_RX_SIZE;
 		if (next_tail == head) {
 			// Buffer is full. Drop the oldest data in the buffer.
@@ -35,19 +37,19 @@ static void receive_slip_data()
 	}
 }
 
-static byte recv_char()
+static uint8_t recv_char()
 {
 	while (head == tail) {
 		receive_slip_data();
 	}
-	byte b = slip_rx_buffer[head];
+	uint8_t b = slip_rx_buffer[head];
 	head = (head + 1) % SLIP_RX_SIZE;
 
 	//if (b == END) --end_count;
 	return b;
 }
 
-static void send_char(byte c)
+static void send_char(uint8_t c)
 {
 	Serial.write(c);
 	receive_slip_data();
@@ -63,7 +65,7 @@ static void send_char(byte c)
  */
 void slip_send_packet(const void *vp, unsigned len)
 {
-	const byte *p = (const byte *)vp;
+	const uint8_t *p = (const uint8_t *)vp;
 
 	/* send an initial END character to flush out any data that may
 	 * have accumulated in the receiver due to line noise
@@ -111,9 +113,9 @@ void slip_send_packet(const void *vp, unsigned len)
  *      be truncated.
  *      Returns the number of bytes stored in the buffer.
  */
-unsigned slip_recv_packet(byte *p, unsigned len)
+unsigned slip_recv_packet(uint8_t *p, unsigned len)
 {
-	byte c;
+	uint8_t c;
 	unsigned received = 0;
 
 	/* sit in a loop reading bytes until we put together

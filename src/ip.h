@@ -1,50 +1,46 @@
 #ifndef IP_H
 #define IP_H
 
-//#include <stdint.h>
-#include <Arduino.h>
-
-// Arduino doesn't define these types:
-typedef uint16_t word;
-typedef uint32_t dword;
+#include <stdint.h>
+//#include <Arduino.h>
 
 // XXX avr-gcc fills the LSb in bitfields first.
 // Note: all multi-byte fields are Big Endian.
 
 struct ipv4_header {
-	byte ihl:4;
-	byte version:4;
-	byte ecn:2;
-	byte dscp:6;
-	word total_length;
+	uint8_t  ihl:4;
+	uint8_t  version:4;
+	uint8_t  ecn:2;
+	uint8_t  dscp:6;
+	uint16_t total_length;
 
-	word identification;
-	byte fragment_offset_h:5;
-	byte flags:3;
-	byte fragment_offset_l:8;
+	uint16_t identification;
+	uint8_t  fragment_offset_h:5;
+	uint8_t  flags:3;
+	uint8_t  fragment_offset_l:8;
 
-	byte ttl;
-	byte proto;
-	word header_checksum;
+	uint8_t  ttl;
+	uint8_t  proto;
+	uint16_t header_checksum;
 
-	dword src;
+	uint32_t src;
 
-	dword dst;
+	uint32_t dst;
 
-	byte options[0]; // may be 0 or more bytes
+	uint8_t  options[0]; // may be 0 or more bytes
 };
 
 struct icmp_header {
-	byte type;
-	byte code;
-	word checksum;
+	uint8_t  type;
+	uint8_t  code;
+	uint16_t checksum;
 
-	dword rest_of_header;
+	uint32_t rest_of_header;
 };
 
 // IPv4 address. Octets are in network byte order so it can be compared
 // directly to an in-memory IP address.
-#define IP(a,b,c,d) (((dword)(d) << 24) | ((dword)(c) << 16) | ((dword)(b) << 8) | (a))
+#define IP(a,b,c,d) (((uint32_t)(d) << 24) | ((uint32_t)(c) << 16) | ((uint32_t)(b) << 8) | (a))
 
 static inline uint16_t ntohs(uint16_t x)
 {

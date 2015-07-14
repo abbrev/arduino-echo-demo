@@ -20,22 +20,22 @@ void setup()
 
 // 10.32.8.2
 // 10.1.72.2
-static const dword myip = IP(10,0,7,2);
+static const uint32_t myip = IP(10,0,7,2);
 
 static const int led = 13;
 
 #define MTU 576
 
-static void swap_ip_addresses(dword *a, dword *b)
+static void swap_ip_addresses(uint32_t *a, uint32_t *b)
 {
-	dword t = *a;
+	uint32_t t = *a;
 	*a = *b;
 	*b = t;
 }
 
-static void swap_ports(word *a, word *b)
+static void swap_ports(uint16_t *a, uint16_t *b)
 {
-	word t = *a;
+	uint16_t t = *a;
 	*a = *b;
 	*b = t;
 }
@@ -43,8 +43,8 @@ static void swap_ports(word *a, word *b)
 void handle_tcp_echo(ipv4_header *ip, tcp_header *tcp)
 {
 	unsigned total_length = ntohs(ip->total_length);
-	//byte header_length = ip->ihl * 4;
-	byte tcp_header_length = tcp->data_offset * 4;
+	//uint8_t header_length = ip->ihl * 4;
+	uint8_t tcp_header_length = tcp->data_offset * 4;
 	//unsigned segment_length = total_length - header_length - tcp_header_length;
 
 	// Acknowledge a SYN to start a connection.
@@ -82,8 +82,8 @@ void handle_tcp_echo(ipv4_header *ip, tcp_header *tcp)
 void handle_tcp_discard(ipv4_header *ip, tcp_header *tcp)
 {
 	unsigned total_length = ntohs(ip->total_length);
-	byte header_length = ip->ihl * 4;
-	byte tcp_header_length = tcp->data_offset * 4;
+	uint8_t header_length = ip->ihl * 4;
+	uint8_t tcp_header_length = tcp->data_offset * 4;
 	unsigned segment_length = total_length - header_length - tcp_header_length;
 
 	// Acknowledge a SYN to start a connection.
@@ -124,10 +124,10 @@ void handle_tcp_discard(ipv4_header *ip, tcp_header *tcp)
 void handle_tcp(ipv4_header *ip, void *data)
 {
 	unsigned total_length = ntohs(ip->total_length);
-	byte header_length = ip->ihl * 4;
+	uint8_t header_length = ip->ihl * 4;
 
 	tcp_header *tcp = (tcp_header *)data;
-	byte tcp_header_length = tcp->data_offset * 4;
+	uint8_t tcp_header_length = tcp->data_offset * 4;
 
 	if (tcp_header_length < 20) return;
 
@@ -150,7 +150,7 @@ void handle_tcp(ipv4_header *ip, void *data)
 		tcp->syn = 0;
 		tcp->rst = 1;
 #endif
-		dword seqno = ntohl(tcp->seqno);
+		uint32_t seqno = ntohl(tcp->seqno);
 		tcp->ackno = htonl(seqno + 1);
 
 		tcp->ack = 1;
@@ -178,7 +178,7 @@ void handle_icmp(ipv4_header *ip, void *data)
 {
 	unsigned total_length = ntohs(ip->total_length);
 
-	byte header_length = ip->ihl * 4;
+	uint8_t header_length = ip->ihl * 4;
 
 	icmp_header *icmp = (icmp_header *)data;
 
@@ -210,7 +210,7 @@ void handle_icmp(ipv4_header *ip, void *data)
 
 void loop()
 {
-	byte packet[MTU];
+	uint8_t packet[MTU];
 
 	unsigned len = slip_recv_packet(packet, sizeof packet);
 	digitalWrite(led, HIGH);
@@ -222,7 +222,7 @@ void loop()
 	// is this packet destined to us? TODO or to the broadcast IP?
 	if (ip->dst != myip) return;
 
-	byte header_length = ip->ihl * 4;
+	uint8_t header_length = ip->ihl * 4;
 
 	void *data = &packet[header_length];
 
