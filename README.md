@@ -2,13 +2,43 @@ Arduino Echo Server
 ===================
 
 This is a silly little demo of a networked "server" that runs on an
-Arduino. It responds to ICMP Echo Requests and to TCP segments on port 7
-(the echo service). This means that you can "ping" your Arduino or
-connect to it on port 7 with TCP. Other TCP ports will be refused, and
-other protocols (eg, UDP) will be ignored.
+Arduino. It responds to ICMP Echo Requests and to TCP segments on ports
+7 (the echo service) and 9 (the discard service). This means that you
+can "ping" your Arduino or connect to it on port 7 or 9 with TCP. Other
+TCP ports are refused, and other protocols (eg, UDP) are ignored.
 
 This program uses the UART as a network interface using the plain SLIP
 protocol.
+
+
+ICMP Echo
+---------
+
+The "ping" utility found on most operating systems sends ICMP echo
+requests to the destination host and waits for ICMP echo replies. This
+demo sends a reply for every valid request that it receives. All data
+received in the request is sent back.
+
+
+TCP Echo
+--------
+
+The TCP Echo protocol echoes all data received. This demo responds to
+all TCP connections on port 7, echoing all data received.
+
+
+TCP Discard
+-----------
+
+The TCP Discard protocol discards all data received. This demo responds
+to all TCP connections on port 9, discarding all data received.
+
+
+Other TCP ports
+---------------
+
+This demo responds to connections on all other TCP ports with an RST
+segment, which is interpreted as "connection refused".
 
 
 Configuring SLIP (Linux)
@@ -93,13 +123,14 @@ streaming data as fast as possible). Tests were performed in Linux.
 Transfer rate is the application data transfer rate out of the total
 available transfer rate (57600 bps). Note that TCP and IP have overhead
 of about 40 bytes per data packet plus 40 bytes per ACK-only packet, so
-the maximum theoretical application data transfer rate is about 86% of
+the theoretical maximum application data transfer rate is about 86% of
 the total available transfer rate (CSLIP would alleviate this overhead
 somewhat).
 
-TCP echo summary: almost any number of parallel connections nearly
-saturates the available bandwidth. Performance drops above 20
-connections, possibly due to the high RTT on each individual connection.
+TCP summary: application data transfer rates are close to the
+theoretical maximum data transfer rate with almost any number of
+parallel connections. Transfer rates drop above 20 connections, possibly
+due to the high RTT on each individual connection.
 
 Pings were done with various packet sizes ("-s" option in the Linux
 "ping" command). Response times are largely dominated by the transfer
